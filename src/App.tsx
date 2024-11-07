@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import { Box, FormControl, FormLabel, Select, Button, Stack, Flex, Text, Input, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, HStack } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import './App.css'
+import PrintFlights from './service/printFlights';
+import FlightSearchForm from './service/flightSearchForm';
+import PaginationControl from './service/paginationControl';
 
-interface FlightResult {
+export interface FlightResult {
   id: number;
   departureAirport: string;
   departureTime: string;
@@ -76,9 +79,6 @@ function App() {
     { value: "CHC", label: "基督城國際機場 (CHC)" },
   ];
 
-  const filteredDepartureOptions = airports.filter(airport => airport.value !== destination);
-  const filteredDestinationOptions = airports.filter(airport => airport.value !== departure);
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentResults = results.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(results.length / itemsPerPage);
@@ -92,115 +92,26 @@ function App() {
 
   return (
     <Box w="100%" maxW="1200px" mx="auto" mt={5} p={10} borderWidth={1} borderRadius="md">
-      <Flex mb={4} align="center" direction={{ base: 'column', md: 'row' }} gap={4}>
-        <FormControl id="departure" flex="3">
-          <FormLabel>起點</FormLabel>
-          <Select
-            placeholder="選擇起點"
-            value={departure}
-            onChange={(e) => setDeparture(e.target.value)}
-          >
-            {filteredDepartureOptions.map((airport) => (
-              <option key={airport.value} value={airport.value}>
-                {airport.label}
-              </option>
-            ))}
-          </Select>
-        </FormControl>
+      <FlightSearchForm
+        departure={departure}
+        setDeparture={setDeparture}
+        destination={destination}
+        setDestination={setDestination}
+        date={date}
+        setDate={setDate}
+        itemsPerPage={itemsPerPage}
+        setItemsPerPage={setItemsPerPage}
+        handleSearch={handleSearch}
+        airports={airports}
+      />
 
-        <FormControl id="destination" flex="3">
-          <FormLabel>終點</FormLabel>
-          <Select
-            placeholder="選擇終點"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-          >
-            {filteredDestinationOptions.map((airport) => (
-              <option key={airport.value} value={airport.value}>
-                {airport.label}
-              </option>
-            ))}
-          </Select>
-        </FormControl>
+      <PrintFlights results={results} />
 
-        <FormControl id="date" flex="2">
-          <FormLabel>日期</FormLabel>
-          <Input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        </FormControl>
-
-        <FormControl id="itemsPerPage" flex="1">
-          <FormLabel>筆數</FormLabel>
-          <Select
-            value={itemsPerPage}
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-          </Select>
-        </FormControl>
-
-
-        <Button
-          colorScheme="blue"
-          onClick={handleSearch}
-          isDisabled={!departure || !destination}
-          alignSelf={{ base: 'stretch', md: 'flex-end' }}
-        >
-          查詢班機
-        </Button>
-      </Flex>
-
-      <Box mt={6}>
-        {results.length > 0 && (
-          <Stack spacing={4}>
-            {results.filter((result) => result.status === 1).map((result) => (
-              <Flex
-                key={result.id}
-                align="center"
-                p={4}
-                borderWidth={1}
-                borderRadius="md"
-                justify="space-between"
-                direction={{ base: 'column', md: 'row' }}
-                gap={4}
-              >
-                <Text>{result.departureAirport} ({result.departureTime})</Text>
-                <Text fontSize="lg">&gt;&gt;</Text>
-                <Text>{result.arrivalAirport} ({result.arrivalTime})</Text>
-                <Text>{result.flight}</Text>
-                <Text>價格 {result.price}</Text>
-                <Text>剩餘座位 {result.availableSeats}</Text>
-                <Button colorScheme="teal">訂票</Button>
-              </Flex>
-            ))}
-          </Stack>
-        )}
-      </Box>
-
-      <Box mt={4} textAlign="center">
-        <Text>目前頁數 / 總頁數：{currentPage} / {totalPages}</Text>
-        <HStack justify="center" mt={2}>
-          <NumberInput
-            min={1}
-            max={totalPages}
-            value={currentPage}
-            onChange={handlePageChange}
-            maxW="70px"
-            mr="2rem"
-          >
-            <NumberInputField />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
-        </HStack>
-      </Box>
+      <PaginationControl 
+        currentPage={currentPage} 
+        totalPages={totalPages} 
+        onPageChange={handlePageChange} 
+      />
     </Box>
   );
 }
