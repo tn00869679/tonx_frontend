@@ -41,7 +41,7 @@ const PrintFlights = ({ results, onBookFlight, reloadCurrentPage }: {
               <Text>{result.ArrivalAirport} ({formatToHHMM(result.ArrivalTime)})</Text>
               <Text>{result.Flight}</Text>
               <Text>價格 {result.Price}</Text>
-              <Text>剩餘座位 {result.AvailableSeats}</Text>
+              <Text>剩餘座位 {result.AvailableSeats+result.Overbooking}</Text>
               <Button colorScheme="teal" onClick={() => handleBookClick(result.DepartureTime, result.Flight)}>訂票</Button>
             </Flex>
           ))}
